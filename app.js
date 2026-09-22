@@ -15,7 +15,10 @@ let nfcReader = null;
 
 let nfcReadingActive = false;
 
+let nfcScanController = null;
+
 let currentTagIsBlank = false;
+
 
 
 // ============================================================
@@ -691,9 +694,7 @@ async function obtenerSiguienteConoId() {
 
 async function iniciarNFC() {
 
-    if (
-        !("NDEFReader" in window)
-    ) {
+    if (!("NDEFReader" in window)) {
 
         mostrarError(
             "Este navegador no admite Web NFC.\n\n" +
@@ -704,7 +705,6 @@ async function iniciarNFC() {
 
     }
 
-
     try {
 
         if (!nfcReader) {
@@ -714,12 +714,10 @@ async function iniciarNFC() {
 
         }
 
-
         mostrarEstado(
             "Acerca el NFC del cono al teléfono...",
             "reading"
         );
-
 
         scanButton.disabled =
             true;
@@ -727,7 +725,18 @@ async function iniciarNFC() {
 
         if (!nfcReadingActive) {
 
-            await nfcReader.scan();
+            // Controlador para poder detener
+            // el escaneo antes de escribir.
+
+            nfcScanController =
+                new AbortController();
+
+
+            await nfcReader.scan({
+                signal:
+                    nfcScanController.signal
+            });
+
 
             nfcReadingActive =
                 true;
@@ -742,8 +751,24 @@ async function iniciarNFC() {
 
         }
 
-
     } catch (error) {
+
+        // AbortError es normal cuando nosotros
+        // detenemos el escaneo para escribir.
+
+        if (
+            error.name ===
+            "AbortError"
+        ) {
+
+            console.log(
+                "Escaneo NFC detenido."
+            );
+
+            return;
+
+        }
+
 
         console.error(
             "Error iniciando NFC:",
@@ -763,7 +788,6 @@ async function iniciarNFC() {
     }
 
 }
-
 
 // ============================================================
 // LEER NFC
