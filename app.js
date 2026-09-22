@@ -2,23 +2,14 @@
 // ALMACEN SOCO - CONTROL DE CONOS NFC
 // ============================================================
 
-
-// ============================================================
-// VARIABLES
-// ============================================================
-
 let currentNfcId = "";
-
 let currentConoData = null;
 
 let nfcReader = null;
-
 let nfcReadingActive = false;
-
 let nfcScanController = null;
 
 let currentTagIsBlank = false;
-
 
 
 // ============================================================
@@ -29,7 +20,7 @@ const scanButton =
     document.getElementById("scanButton");
 
 const statusCard =
-    document.getElementById("status");
+    document.getElementById("statusCard");
 
 const statusText =
     document.getElementById("statusText");
@@ -73,19 +64,14 @@ const nfcCode =
 const notFoundCode =
     document.getElementById("notFoundCode");
 
-
-// ============================================================
-// FORMULARIO
-// ============================================================
-
 const registerProductButton =
     document.getElementById(
         "registerProductButton"
     );
 
-const registerCard =
+const registrationCard =
     document.getElementById(
-        "registerCard"
+        "registrationCard"
     );
 
 const inputCodigo =
@@ -96,6 +82,21 @@ const inputCodigo =
 const inputProducto =
     document.getElementById(
         "inputProducto"
+    );
+
+const inputDescripcion =
+    document.getElementById(
+        "inputDescripcion"
+    );
+
+const inputProveedor =
+    document.getElementById(
+        "inputProveedor"
+    );
+
+const inputColor =
+    document.getElementById(
+        "inputColor"
     );
 
 const inputPeso =
@@ -118,21 +119,6 @@ const cancelRegisterButton =
         "cancelRegisterButton"
     );
 
-const registerStatus =
-    document.getElementById(
-        "registerStatus"
-    );
-
-const registerStatusText =
-    document.getElementById(
-        "registerStatusText"
-    );
-
-
-// ============================================================
-// ACCIONES
-// ============================================================
-
 const entryButton =
     document.getElementById(
         "entryButton"
@@ -148,6 +134,11 @@ const historyButton =
         "historyButton"
     );
 
+const newProductNotice =
+    document.getElementById(
+        "newProductNotice"
+    );
+
 
 // ============================================================
 // INTERFAZ
@@ -155,119 +146,56 @@ const historyButton =
 
 function ocultarTodo() {
 
+    if (statusCard) {
+        statusCard.style.display = "none";
+    }
+
     if (resultCard) {
-
-        resultCard.classList.add(
-            "hidden"
-        );
-
+        resultCard.style.display = "none";
     }
 
     if (notFoundCard) {
-
-        notFoundCard.classList.add(
-            "hidden"
-        );
-
-    }
-
-    if (registerCard) {
-
-        registerCard.classList.add(
-            "hidden"
-        );
-
+        notFoundCard.style.display = "none";
     }
 
     if (errorCard) {
-
-        errorCard.classList.add(
-            "hidden"
-        );
-
+        errorCard.style.display = "none";
     }
 
+    if (registrationCard) {
+        registrationCard.style.display = "none";
+    }
 }
 
 
-// ============================================================
-// ESTADO
-// ============================================================
+function mostrarEstado(mensaje) {
 
-function mostrarEstado(
-    mensaje,
-    tipo = "waiting"
-) {
-
-    if (!statusCard) {
-        return;
+    if (statusCard) {
+        statusCard.style.display = "block";
     }
-
-    statusCard.className =
-        "status " + tipo;
 
     if (statusText) {
-
-        statusText.textContent =
-            mensaje;
-
+        statusText.textContent = mensaje;
     }
-
 }
 
 
-// ============================================================
-// ESTADO DEL REGISTRO
-// ============================================================
-
-function mostrarEstadoRegistro(
-    mensaje,
-    tipo = "waiting"
-) {
-
-    if (!registerStatus) {
-        return;
-    }
-
-    registerStatus.className =
-        "status " + tipo;
-
-    if (registerStatusText) {
-
-        registerStatusText.textContent =
-            mensaje;
-
-    }
-
-}
-
-
-// ============================================================
-// ERROR
-// ============================================================
-
-function mostrarError(
-    mensaje
-) {
+function mostrarError(mensaje) {
 
     ocultarTodo();
 
     if (errorCard) {
 
-        errorCard.classList.remove(
-            "hidden"
-        );
+        errorCard.style.display = "block";
 
         const errorText =
-            document.getElementById(
-                "errorText"
+            errorCard.querySelector(
+                "#errorText"
             );
 
         if (errorText) {
-
             errorText.textContent =
                 mensaje;
-
         }
 
     } else {
@@ -275,186 +203,323 @@ function mostrarError(
         alert(mensaje);
 
     }
-
 }
 
 
-// ============================================================
-// FORMATEAR PESO
-// ============================================================
-
-function formatearPeso(
-    valor
-) {
+function formatearPeso(valor) {
 
     const numero =
         Number(valor);
 
     if (isNaN(numero)) {
-
         return "0 g";
-
     }
 
     return (
-        numero.toLocaleString(
-            "es-PE"
-        ) +
+        numero.toLocaleString("es-PE") +
         " g"
     );
-
 }
 
 
 // ============================================================
-// MOSTRAR CONO NO REGISTRADO
+// NFC NO ENCONTRADO
 // ============================================================
 
-function mostrarNoEncontrado(
-    idNfc
-) {
+function mostrarNoEncontrado(idNfc) {
 
     ocultarTodo();
 
     if (notFoundCard) {
-
-        notFoundCard.classList.remove(
-            "hidden"
-        );
-
+        notFoundCard.style.display =
+            "block";
     }
 
     if (notFoundCode) {
-
         notFoundCode.textContent =
             idNfc;
-
     }
-
-    mostrarEstado(
-        "Cono no registrado",
-        "waiting"
-    );
-
 }
 
 
 // ============================================================
-// MOSTRAR PRODUCTO
+// BUSCAR PRODUCTO
 // ============================================================
 
-function mostrarProducto(
-    data
+async function buscarProductoPorCodigo(codigo) {
+
+    const response =
+        await fetch(
+            "/api/google?action=product&codigo=" +
+            encodeURIComponent(codigo) +
+            "&t=" +
+            Date.now(),
+            {
+                cache: "no-store"
+            }
+        );
+
+    if (!response.ok) {
+
+        throw new Error(
+            "Error HTTP " +
+            response.status
+        );
+    }
+
+    return await response.json();
+}
+
+
+// ============================================================
+// LIMPIAR DATOS DEL PRODUCTO
+// ============================================================
+
+function limpiarDatosProducto() {
+
+    if (inputDescripcion) {
+        inputDescripcion.value = "";
+    }
+
+    if (inputProveedor) {
+        inputProveedor.value = "";
+    }
+
+    if (inputColor) {
+        inputColor.value = "";
+    }
+}
+
+
+// ============================================================
+// CAMPOS PRODUCTO
+// ============================================================
+
+function configurarCamposProducto(
+    editable
 ) {
+
+    if (inputDescripcion) {
+        inputDescripcion.readOnly =
+            !editable;
+    }
+
+    if (inputProveedor) {
+        inputProveedor.readOnly =
+            !editable;
+    }
+
+    if (inputColor) {
+        inputColor.readOnly =
+            !editable;
+    }
+}
+
+
+// ============================================================
+// CARGAR PRODUCTO EN FORMULARIO
+// ============================================================
+
+async function cargarProductoEnFormulario(
+    codigo
+) {
+
+    codigo =
+        String(codigo || "").trim();
+
+    if (!codigo) {
+        return;
+    }
+
+    try {
+
+        mostrarEstado(
+            "Buscando producto " +
+            codigo +
+            "..."
+        );
+
+        const data =
+            await buscarProductoPorCodigo(
+                codigo
+            );
+
+        if (!data.success) {
+
+            throw new Error(
+                data.error ||
+                "No se pudo consultar el producto."
+            );
+        }
+
+
+        // ====================================================
+        // PRODUCTO EXISTENTE
+        // ====================================================
+
+        if (
+            data.found &&
+            data.data
+        ) {
+
+            inputDescripcion.value =
+                data.data.DESCRIPCION ||
+                "";
+
+            inputProveedor.value =
+                data.data.PROVEEDOR ||
+                "";
+
+            inputColor.value =
+                data.data.COLOR ||
+                "";
+
+            configurarCamposProducto(
+                false
+            );
+
+            if (newProductNotice) {
+                newProductNotice.style.display =
+                    "none";
+            }
+
+            mostrarEstado(
+                "Producto encontrado. Características cargadas automáticamente."
+            );
+
+            return true;
+        }
+
+
+        // ====================================================
+        // PRODUCTO NUEVO
+        // ====================================================
+
+        limpiarDatosProducto();
+
+        configurarCamposProducto(
+            true
+        );
+
+        if (newProductNotice) {
+            newProductNotice.style.display =
+                "block";
+        }
+
+        mostrarEstado(
+            "Código nuevo. Completa las características del producto."
+        );
+
+        return false;
+
+
+    } catch (error) {
+
+        console.error(
+            "Error buscando producto:",
+            error
+        );
+
+        limpiarDatosProducto();
+
+        configurarCamposProducto(
+            true
+        );
+
+        if (newProductNotice) {
+            newProductNotice.style.display =
+                "block";
+        }
+
+        mostrarEstado(
+            "No se pudo consultar el producto."
+        );
+
+        return false;
+    }
+}
+
+
+// ============================================================
+// MOSTRAR PRODUCTO / CONO
+// ============================================================
+
+function mostrarProducto(data) {
 
     ocultarTodo();
 
     currentConoData =
         data;
 
-
     if (resultCard) {
-
-        resultCard.classList.remove(
-            "hidden"
-        );
-
+        resultCard.style.display =
+            "block";
     }
-
 
     if (productCode) {
-
         productCode.textContent =
-            data.CODIGO || "—";
-
+            data.CODIGO ||
+            "—";
     }
-
 
     if (productDescription) {
-
         productDescription.textContent =
-            data.DESCRIPCION || "—";
-
+            data.DESCRIPCION ||
+            "—";
     }
-
 
     if (productProvider) {
-
         productProvider.textContent =
-            data.PROVEEDOR || "—";
-
+            data.PROVEEDOR ||
+            "—";
     }
-
 
     if (productColor) {
-
         productColor.textContent =
-            data.COLOR || "—";
-
+            data.COLOR ||
+            "—";
     }
 
-
     if (productWeight) {
-
         productWeight.textContent =
             formatearPeso(
                 data.PESO_ACTUAL
             );
-
     }
 
-
     if (productTotalStock) {
-
         productTotalStock.textContent =
             formatearPeso(
                 data.STOCK_TOTAL
             );
-
     }
-
 
     if (productLocation) {
-
         productLocation.textContent =
-            data.UBICACION || "—";
-
+            data.UBICACION ||
+            "—";
     }
-
 
     if (productStatus) {
-
         productStatus.textContent =
-            data.ESTADO || "—";
-
+            data.ESTADO ||
+            "—";
     }
 
-
     if (nfcCode) {
-
         nfcCode.textContent =
             data.ID_NFC ||
             currentNfcId ||
             "—";
-
     }
-
-
-    mostrarEstado(
-        "Cono encontrado",
-        "success"
-    );
-
 }
 
 
 // ============================================================
-// BUSCAR CONO EN GOOGLE SHEETS
+// BUSCAR CONO
 // ============================================================
 
-async function buscarCono(
-    idNfc
-) {
+async function buscarCono(idNfc) {
 
     if (!idNfc) {
 
@@ -463,9 +528,7 @@ async function buscarCono(
         );
 
         return;
-
     }
-
 
     try {
 
@@ -475,22 +538,12 @@ async function buscarCono(
             "..."
         );
 
-
         const url =
             "/api/google?action=inventory&id_nfc=" +
-            encodeURIComponent(
-                idNfc
-            );
-
+            encodeURIComponent(idNfc);
 
         const response =
-            await fetch(
-                url,
-                {
-                    cache: "no-store"
-                }
-            );
-
+            await fetch(url);
 
         if (!response.ok) {
 
@@ -498,19 +551,15 @@ async function buscarCono(
                 "Error HTTP " +
                 response.status
             );
-
         }
-
 
         const data =
             await response.json();
-
 
         console.log(
             "Respuesta inventario:",
             data
         );
-
 
         if (!data.success) {
 
@@ -520,33 +569,31 @@ async function buscarCono(
             );
 
             return;
-
         }
 
+
+        // CONO NO REGISTRADO
 
         if (!data.found) {
 
             currentConoData =
                 null;
 
-            currentTagIsBlank =
-                false;
-
             mostrarNoEncontrado(
                 idNfc
             );
 
             return;
-
         }
 
+
+        // CONO ENCONTRADO
 
         currentNfcId =
             data.data.ID_NFC;
 
         currentTagIsBlank =
             false;
-
 
         mostrarProducto(
             data.data
@@ -560,26 +607,16 @@ async function buscarCono(
             error
         );
 
-
         mostrarError(
             "No se pudo consultar el sistema.\n\n" +
             error.message
         );
-
     }
-
 }
 
 
 // ============================================================
-// OBTENER SIGUIENTE ID
-// ============================================================
-//
-// IMPORTANTE:
-//
-// Esta función solamente se llama al GUARDAR.
-// Ya no se llama al abrir el formulario.
-//
+// SIGUIENTE ID DE CONO
 // ============================================================
 
 async function obtenerSiguienteConoId() {
@@ -587,30 +624,21 @@ async function obtenerSiguienteConoId() {
     try {
 
         mostrarEstado(
-            "Generando ID del cono..."
+            "Consultando siguiente ID..."
         );
-
 
         const url =
             "/api/google?action=nextConoId&t=" +
             Date.now();
 
-
         const response =
             await fetch(
                 url,
                 {
-                    method: "GET",
-                    cache: "no-store"
+                    method:"GET",
+                    cache:"no-store"
                 }
             );
-
-
-        console.log(
-            "Estado nextConoId:",
-            response.status
-        );
-
 
         if (!response.ok) {
 
@@ -618,39 +646,25 @@ async function obtenerSiguienteConoId() {
                 "Error HTTP " +
                 response.status
             );
-
         }
-
 
         const texto =
             await response.text();
 
-
-        console.log(
-            "Respuesta nextConoId:",
-            texto
-        );
-
-
         let data;
-
 
         try {
 
             data =
-                JSON.parse(
-                    texto
-                );
+                JSON.parse(texto);
 
         } catch (error) {
 
             throw new Error(
-                "El servidor no devolvió JSON válido:\n" +
+                "El servidor no devolvió JSON válido: " +
                 texto
             );
-
         }
-
 
         if (
             !data.success ||
@@ -661,18 +675,9 @@ async function obtenerSiguienteConoId() {
                 data.error ||
                 "No se pudo generar el ID."
             );
-
         }
 
-
-        console.log(
-            "ID generado:",
-            data.id_nfc
-        );
-
-
         return data.id_nfc;
-
 
     } catch (error) {
 
@@ -682,9 +687,7 @@ async function obtenerSiguienteConoId() {
         );
 
         throw error;
-
     }
-
 }
 
 
@@ -698,99 +701,66 @@ async function iniciarNFC() {
 
         mostrarError(
             "Este navegador no admite Web NFC.\n\n" +
-            "Usa Google Chrome en tu Samsung Galaxy S21+."
+            "Usa Chrome en tu Samsung Galaxy S21+."
         );
 
         return;
-
     }
 
     try {
 
         if (!nfcReader) {
-
             nfcReader =
                 new NDEFReader();
-
         }
 
         mostrarEstado(
-            "Acerca el NFC del cono al teléfono...",
-            "reading"
+            "Acerca el NFC del cono al teléfono..."
         );
 
         scanButton.disabled =
             true;
 
-
         if (!nfcReadingActive) {
-
-            // Controlador para poder detener
-            // el escaneo antes de escribir.
 
             nfcScanController =
                 new AbortController();
-
 
             await nfcReader.scan({
                 signal:
                     nfcScanController.signal
             });
 
-
             nfcReadingActive =
                 true;
-
 
             nfcReader.onreading =
                 manejarLecturaNFC;
 
-
             nfcReader.onreadingerror =
                 manejarErrorNFC;
-
         }
 
     } catch (error) {
-
-        // AbortError es normal cuando nosotros
-        // detenemos el escaneo para escribir.
-
-        if (
-            error.name ===
-            "AbortError"
-        ) {
-
-            console.log(
-                "Escaneo NFC detenido."
-            );
-
-            return;
-
-        }
-
 
         console.error(
             "Error iniciando NFC:",
             error
         );
 
-
         scanButton.disabled =
             false;
-
 
         mostrarError(
             "No se pudo iniciar NFC.\n\n" +
             error.message
         );
-
     }
-
 }
 
+
 // ============================================================
-// LEER NFC
+// LECTURA NFC
 // ============================================================
 
 async function manejarLecturaNFC(
@@ -802,16 +772,10 @@ async function manejarLecturaNFC(
         event
     );
 
-
     try {
 
-        let contenido =
-            "";
+        let contenido = "";
 
-
-        // ----------------------------------------------------
-        // LEER NDEF
-        // ----------------------------------------------------
 
         if (
             event.message &&
@@ -824,7 +788,7 @@ async function manejarLecturaNFC(
             ) {
 
                 console.log(
-                    "Registro NFC:",
+                    "Registro:",
                     record
                 );
 
@@ -843,7 +807,6 @@ async function manejarLecturaNFC(
                                 "utf-8"
                             );
 
-
                         contenido =
                             decoder
                                 .decode(
@@ -851,20 +814,18 @@ async function manejarLecturaNFC(
                                 )
                                 .trim();
 
-
                     } catch (error) {
 
-                        console.warn(
-                            "Error leyendo texto:",
+                        console.error(
+                            "Error texto:",
                             error
                         );
 
                     }
-
                 }
 
 
-                // URL
+                // URI
 
                 else if (
                     record.recordType ===
@@ -878,7 +839,6 @@ async function manejarLecturaNFC(
                                 "utf-8"
                             );
 
-
                         contenido =
                             decoder
                                 .decode(
@@ -886,38 +846,17 @@ async function manejarLecturaNFC(
                                 )
                                 .trim();
 
-
                     } catch (error) {
 
-                        console.warn(
-                            "Error leyendo URL:",
+                        console.error(
+                            "Error URL:",
                             error
                         );
-
                     }
-
-                }
-
-
-                if (contenido) {
-
-                    break;
-
                 }
 
             }
-
         }
-
-
-        contenido =
-            contenido.trim();
-
-
-        console.log(
-            "Contenido NFC:",
-            contenido
-        );
 
 
         // ====================================================
@@ -935,39 +874,22 @@ async function manejarLecturaNFC(
             currentTagIsBlank =
                 true;
 
-
             scanButton.disabled =
                 false;
 
-
             ocultarTodo();
 
-
             if (notFoundCard) {
-
-                notFoundCard.classList.remove(
-                    "hidden"
-                );
-
+                notFoundCard.style.display =
+                    "block";
             }
-
 
             if (notFoundCode) {
-
                 notFoundCode.textContent =
                     "NFC VACÍO";
-
             }
 
-
-            mostrarEstado(
-                "NFC vacío",
-                "waiting"
-            );
-
-
             return;
-
         }
 
 
@@ -981,10 +903,8 @@ async function manejarLecturaNFC(
         currentTagIsBlank =
             false;
 
-
         scanButton.disabled =
             false;
-
 
         await buscarCono(
             currentNfcId
@@ -998,18 +918,13 @@ async function manejarLecturaNFC(
             error
         );
 
-
         scanButton.disabled =
             false;
 
-
         mostrarError(
-            "No se pudo procesar el NFC.\n\n" +
-            error.message
+            "No se pudo procesar el NFC."
         );
-
     }
-
 }
 
 
@@ -1017,196 +932,146 @@ async function manejarLecturaNFC(
 // ERROR NFC
 // ============================================================
 
-function manejarErrorNFC(
-    event
-) {
+function manejarErrorNFC(event) {
 
     console.warn(
         "Error NFC:",
         event
     );
 
-
     scanButton.disabled =
         false;
-
 
     mostrarError(
         "No se pudo leer correctamente el NFC."
     );
-
 }
 
 
 // ============================================================
 // ABRIR REGISTRO
 // ============================================================
-//
-// IMPORTANTE:
-//
-// Aquí NO generamos todavía CONO-XXXX.
-//
-// Solo mostramos el formulario.
-// El ID se genera al pulsar GUARDAR.
-//
-// ============================================================
 
-function mostrarRegistroCono() {
+async function mostrarRegistroCono() {
 
     try {
 
         ocultarTodo();
 
-
         currentNfcId =
             "";
-
-
-        // Como estamos registrando
-        // un NFC vacío.
 
         currentTagIsBlank =
             true;
 
+        if (registrationCard) {
 
-        currentConoData =
-            null;
-
-
-        // ----------------------------------------------------
-        // MOSTRAR FORMULARIO
-        // ----------------------------------------------------
-
-        if (registerCard) {
-
-            registerCard.classList.remove(
-                "hidden"
-            );
-
+            registrationCard.style.display =
+                "block";
         }
-
-
-        // ----------------------------------------------------
-        // ID PENDIENTE
-        // ----------------------------------------------------
 
         if (inputCodigo) {
 
             inputCodigo.value =
                 "Se generará al guardar";
 
+            inputCodigo.readOnly =
+                true;
         }
-
-
-        // ----------------------------------------------------
-        // LIMPIAR CAMPOS
-        // ----------------------------------------------------
 
         if (inputProducto) {
-
             inputProducto.value =
                 "";
-
         }
 
+        limpiarDatosProducto();
+
+        configurarCamposProducto(
+            false
+        );
+
+        if (newProductNotice) {
+            newProductNotice.style.display =
+                "none";
+        }
 
         if (inputPeso) {
-
             inputPeso.value =
                 "";
-
         }
-
 
         if (inputUbicacion) {
-
             inputUbicacion.value =
                 "";
-
         }
-
-
-        if (registerStatus) {
-
-            registerStatus.classList.add(
-                "hidden"
-            );
-
-        }
-
 
         mostrarEstado(
-            "Completa los datos del cono.",
-            "waiting"
+            "Nuevo cono. Ingresa el código del producto."
         );
 
-
-        // ----------------------------------------------------
-        // FOCUS
-        // ----------------------------------------------------
-
-        setTimeout(
-            () => {
-
-                if (inputProducto) {
-
-                    inputProducto.focus();
-
-                }
-
-            },
-            300
-        );
-
+        if (inputProducto) {
+            inputProducto.focus();
+        }
 
     } catch (error) {
 
         console.error(
-            "Error preparando registro:",
             error
         );
-
 
         mostrarError(
             "No se pudo abrir el registro.\n\n" +
             error.message
         );
-
     }
-
 }
 
 
 // ============================================================
-// ESCRIBIR ID EN NFC
+// ESCRIBIR NFC
 // ============================================================
 
-async function escribirNFC(
-    idNfc
-) {
+async function escribirNFC(idNfc) {
 
-    if (
-        !("NDEFReader" in window)
-    ) {
+    if (!("NDEFReader" in window)) {
 
         throw new Error(
             "Este navegador no admite escritura NFC."
         );
-
     }
 
 
-    // Usamos un lector nuevo
-    // exclusivamente para escribir.
+    mostrarEstado(
+        "Acerca nuevamente el NFC al teléfono..."
+    );
+
+
+    // Detener lectura antes de escribir
+
+    if (nfcScanController) {
+
+        try {
+            nfcScanController.abort();
+        } catch (e) {}
+
+        nfcScanController =
+            null;
+
+        nfcReadingActive =
+            false;
+
+        await new Promise(
+            resolve =>
+                setTimeout(
+                    resolve,
+                    150
+                )
+        );
+    }
+
 
     const writer =
         new NDEFReader();
-
-
-    mostrarEstado(
-        "Acerca nuevamente el NFC al teléfono...",
-        "reading"
-    );
 
 
     await writer.write({
@@ -1214,11 +1079,8 @@ async function escribirNFC(
         records: [
 
             {
-                recordType:
-                    "text",
-
-                data:
-                    idNfc
+                recordType:"text",
+                data:idNfc
             }
 
         ]
@@ -1227,27 +1089,23 @@ async function escribirNFC(
 
 
     console.log(
-        "NFC escrito correctamente:",
+        "NFC escrito:",
         idNfc
     );
-
 }
 
 
 // ============================================================
-// CANCELAR REGISTRO
+// CANCELAR
 // ============================================================
 
 function cancelarRegistro() {
 
-    if (registerCard) {
+    if (registrationCard) {
 
-        registerCard.classList.add(
-            "hidden"
-        );
-
+        registrationCard.style.display =
+            "none";
     }
-
 
     currentNfcId =
         "";
@@ -1258,12 +1116,7 @@ function cancelarRegistro() {
     currentTagIsBlank =
         false;
 
-
-    mostrarEstado(
-        "Esperando...",
-        "waiting"
-    );
-
+    ocultarTodo();
 }
 
 
@@ -1278,14 +1131,25 @@ async function guardarCono() {
             ? inputProducto.value.trim()
             : "";
 
+    const descripcion =
+        inputDescripcion
+            ? inputDescripcion.value.trim()
+            : "";
+
+    const proveedor =
+        inputProveedor
+            ? inputProveedor.value.trim()
+            : "";
+
+    const color =
+        inputColor
+            ? inputColor.value.trim()
+            : "";
 
     const peso =
         inputPeso
-            ? Number(
-                inputPeso.value
-            )
+            ? Number(inputPeso.value)
             : 0;
-
 
     const ubicacion =
         inputUbicacion
@@ -1293,20 +1157,7 @@ async function guardarCono() {
             : "";
 
 
-    // ========================================================
     // VALIDACIONES
-    // ========================================================
-
-    if (!currentTagIsBlank) {
-
-        alert(
-            "Este registro no corresponde a un NFC vacío."
-        );
-
-        return;
-
-    }
-
 
     if (!codigo) {
 
@@ -1314,16 +1165,11 @@ async function guardarCono() {
             "Ingresa el código del producto."
         );
 
-
         if (inputProducto) {
-
             inputProducto.focus();
-
         }
 
-
         return;
-
     }
 
 
@@ -1336,16 +1182,11 @@ async function guardarCono() {
             "Ingresa un peso válido."
         );
 
-
         if (inputPeso) {
-
             inputPeso.focus();
-
         }
 
-
         return;
-
     }
 
 
@@ -1355,22 +1196,13 @@ async function guardarCono() {
             "Ingresa la ubicación del cono."
         );
 
-
         if (inputUbicacion) {
-
             inputUbicacion.focus();
-
         }
 
-
         return;
-
     }
 
-
-    // ========================================================
-    // DESACTIVAR BOTÓN
-    // ========================================================
 
     if (saveRegisterButton) {
 
@@ -1378,17 +1210,178 @@ async function guardarCono() {
             true;
 
         saveRegisterButton.textContent =
-            "GENERANDO ID...";
-
+            "PREPARANDO...";
     }
 
 
     try {
 
         // ====================================================
-        // PASO 1
-        // GENERAR ID
+        // 1. CONSULTAR PRODUCTO
         // ====================================================
+
+        const productoData =
+            await buscarProductoPorCodigo(
+                codigo
+            );
+
+
+        if (!productoData.success) {
+
+            throw new Error(
+                productoData.error ||
+                "No se pudo consultar el producto."
+            );
+        }
+
+
+        let datosProducto;
+
+
+        // ====================================================
+        // PRODUCTO EXISTENTE
+        // ====================================================
+
+        if (
+            productoData.found &&
+            productoData.data
+        ) {
+
+            datosProducto =
+                productoData.data;
+
+        }
+
+
+        // ====================================================
+        // PRODUCTO NUEVO
+        // ====================================================
+
+        else {
+
+            if (!descripcion) {
+
+                alert(
+                    "Este código es nuevo. Ingresa la descripción del producto."
+                );
+
+                if (inputDescripcion) {
+                    inputDescripcion.focus();
+                }
+
+                return;
+            }
+
+
+            if (!proveedor) {
+
+                alert(
+                    "Este código es nuevo. Ingresa el proveedor."
+                );
+
+                if (inputProveedor) {
+                    inputProveedor.focus();
+                }
+
+                return;
+            }
+
+
+            if (!color) {
+
+                alert(
+                    "Este código es nuevo. Ingresa el color."
+                );
+
+                if (inputColor) {
+                    inputColor.focus();
+                }
+
+                return;
+            }
+
+
+            // ================================================
+            // CREAR PRODUCTO
+            // ================================================
+
+            mostrarEstado(
+                "Creando producto..."
+            );
+
+
+            const responseProducto =
+                await fetch(
+                    "/api/google",
+                    {
+                        method:"POST",
+
+                        headers:{
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                action:
+                                    "createProduct",
+
+                                CODIGO:
+                                    codigo,
+
+                                DESCRIPCION:
+                                    descripcion,
+
+                                PROVEEDOR:
+                                    proveedor,
+
+                                COLOR:
+                                    color,
+
+                                ESTADO:
+                                    "ACTIVO"
+
+                            })
+                    }
+                );
+
+
+            if (!responseProducto.ok) {
+
+                throw new Error(
+                    "Error HTTP creando producto: " +
+                    responseProducto.status
+                );
+            }
+
+
+            const nuevoProducto =
+                await responseProducto.json();
+
+
+            if (!nuevoProducto.success) {
+
+                throw new Error(
+                    nuevoProducto.error ||
+                    "No se pudo crear el producto."
+                );
+            }
+
+
+            datosProducto =
+                nuevoProducto.data;
+        }
+
+
+        // ====================================================
+        // 2. OBTENER ID DEL CONO
+        // ====================================================
+
+        mostrarEstado(
+            "Generando ID del cono..."
+        );
+
 
         const idNfc =
             await obtenerSiguienteConoId();
@@ -1398,55 +1391,34 @@ async function guardarCono() {
             idNfc;
 
 
-        if (inputCodigo) {
+        // ====================================================
+        // 3. ESCRIBIR NFC
+        // ====================================================
 
-            inputCodigo.value =
-                idNfc;
+        mostrarEstado(
+            "Preparando NFC " +
+            idNfc +
+            "..."
+        );
 
+
+        if (currentTagIsBlank) {
+
+            await escribirNFC(
+                idNfc
+            );
         }
 
 
         // ====================================================
-        // PASO 2
-        // ESCRIBIR NFC
-        // ====================================================
-
-        if (saveRegisterButton) {
-
-            saveRegisterButton.textContent =
-                "ACERCA EL NFC...";
-
-        }
-
-
-        mostrarEstadoRegistro(
-            "Acerca nuevamente el NFC al teléfono...",
-            "reading"
-        );
-
-
-        await escribirNFC(
-            idNfc
-        );
-
-
-        // ====================================================
-        // PASO 3
-        // GUARDAR EN GOOGLE SHEETS
+        // 4. GUARDAR CONO
         // ====================================================
 
         if (saveRegisterButton) {
 
             saveRegisterButton.textContent =
                 "GUARDANDO...";
-
         }
-
-
-        mostrarEstadoRegistro(
-            "Guardando cono...",
-            "reading"
-        );
 
 
         const response =
@@ -1454,14 +1426,11 @@ async function guardarCono() {
                 "/api/google",
                 {
 
-                    method:
-                        "POST",
+                    method:"POST",
 
-                    headers: {
-
+                    headers:{
                         "Content-Type":
                             "application/json"
-
                     },
 
                     body:
@@ -1497,18 +1466,11 @@ async function guardarCono() {
                 "Error HTTP " +
                 response.status
             );
-
         }
 
 
         const data =
             await response.json();
-
-
-        console.log(
-            "Respuesta crear cono:",
-            data
-        );
 
 
         if (!data.success) {
@@ -1517,12 +1479,11 @@ async function guardarCono() {
                 data.error ||
                 "No se pudo registrar el cono."
             );
-
         }
 
 
         // ====================================================
-        // REGISTRO COMPLETADO
+        // FINALIZADO
         // ====================================================
 
         currentTagIsBlank =
@@ -1532,22 +1493,12 @@ async function guardarCono() {
             idNfc;
 
 
-        mostrarEstadoRegistro(
-            "Cono registrado correctamente.",
-            "success"
-        );
-
-
         alert(
             "¡Cono registrado correctamente!\n\n" +
             "ID: " +
             idNfc
         );
 
-
-        // ====================================================
-        // VOLVER A CONSULTAR
-        // ====================================================
 
         await buscarCono(
             idNfc
@@ -1560,13 +1511,6 @@ async function guardarCono() {
             "Error registrando cono:",
             error
         );
-
-
-        mostrarEstadoRegistro(
-            error.message,
-            "error"
-        );
-
 
         alert(
             "No se pudo completar el registro.\n\n" +
@@ -1583,11 +1527,8 @@ async function guardarCono() {
 
             saveRegisterButton.textContent =
                 "GUARDAR CONO";
-
         }
-
     }
-
 }
 
 
@@ -1604,7 +1545,6 @@ async function registrarEntrada() {
         );
 
         return;
-
     }
 
 
@@ -1615,9 +1555,7 @@ async function registrarEntrada() {
 
 
     if (cantidad === null) {
-
         return;
-
     }
 
 
@@ -1635,7 +1573,6 @@ async function registrarEntrada() {
         );
 
         return;
-
     }
 
 
@@ -1643,7 +1580,6 @@ async function registrarEntrada() {
         "ENTRADA",
         gramos
     );
-
 }
 
 
@@ -1660,7 +1596,6 @@ async function registrarSalida() {
         );
 
         return;
-
     }
 
 
@@ -1671,9 +1606,7 @@ async function registrarSalida() {
 
 
     if (cantidad === null) {
-
         return;
-
     }
 
 
@@ -1691,7 +1624,6 @@ async function registrarSalida() {
         );
 
         return;
-
     }
 
 
@@ -1699,7 +1631,6 @@ async function registrarSalida() {
         "SALIDA",
         gramos
     );
-
 }
 
 
@@ -1719,14 +1650,11 @@ async function guardarMovimiento(
                 "/api/google",
                 {
 
-                    method:
-                        "POST",
+                    method:"POST",
 
-                    headers: {
-
+                    headers:{
                         "Content-Type":
                             "application/json"
-
                     },
 
                     body:
@@ -1748,7 +1676,6 @@ async function guardarMovimiento(
                                 ""
 
                         })
-
                 }
             );
 
@@ -1759,7 +1686,6 @@ async function guardarMovimiento(
                 "Error HTTP " +
                 response.status
             );
-
         }
 
 
@@ -1775,7 +1701,6 @@ async function guardarMovimiento(
             );
 
             return;
-
         }
 
 
@@ -1798,14 +1723,11 @@ async function guardarMovimiento(
             error
         );
 
-
         alert(
             "No se pudo registrar el movimiento.\n\n" +
             error.message
         );
-
     }
-
 }
 
 
@@ -1822,7 +1744,6 @@ async function mostrarHistorial() {
         );
 
         return;
-
     }
 
 
@@ -1836,12 +1757,7 @@ async function mostrarHistorial() {
 
 
         const response =
-            await fetch(
-                url,
-                {
-                    cache: "no-store"
-                }
-            );
+            await fetch(url);
 
 
         if (!response.ok) {
@@ -1850,7 +1766,6 @@ async function mostrarHistorial() {
                 "Error HTTP " +
                 response.status
             );
-
         }
 
 
@@ -1866,7 +1781,6 @@ async function mostrarHistorial() {
             );
 
             return;
-
         }
 
 
@@ -1883,7 +1797,6 @@ async function mostrarHistorial() {
             );
 
             return;
-
         }
 
 
@@ -1905,7 +1818,6 @@ async function mostrarHistorial() {
                     let fecha =
                         "";
 
-
                     if (
                         movimiento.FECHA
                     ) {
@@ -1917,7 +1829,6 @@ async function mostrarHistorial() {
                             .toLocaleString(
                                 "es-PE"
                             );
-
                     }
 
 
@@ -1926,10 +1837,8 @@ async function mostrarHistorial() {
                         `${movimiento.TIPO} ` +
                         `${movimiento.CANTIDAD_G} g\n`;
 
-
                     texto +=
                         `${fecha}\n`;
-
 
                     texto +=
                         `${movimiento.PESO_ANTERIOR} g → ` +
@@ -1939,9 +1848,7 @@ async function mostrarHistorial() {
             );
 
 
-        alert(
-            texto
-        );
+        alert(texto);
 
 
     } catch (error) {
@@ -1951,14 +1858,11 @@ async function mostrarHistorial() {
             error
         );
 
-
         alert(
             "No se pudo obtener el historial.\n\n" +
             error.message
         );
-
     }
-
 }
 
 
@@ -1972,7 +1876,6 @@ if (scanButton) {
         "click",
         iniciarNFC
     );
-
 }
 
 
@@ -1982,7 +1885,6 @@ if (registerProductButton) {
         "click",
         mostrarRegistroCono
     );
-
 }
 
 
@@ -1992,7 +1894,6 @@ if (cancelRegisterButton) {
         "click",
         cancelarRegistro
     );
-
 }
 
 
@@ -2002,7 +1903,6 @@ if (saveRegisterButton) {
         "click",
         guardarCono
     );
-
 }
 
 
@@ -2012,7 +1912,6 @@ if (entryButton) {
         "click",
         registrarEntrada
     );
-
 }
 
 
@@ -2022,7 +1921,6 @@ if (exitButton) {
         "click",
         registrarSalida
     );
-
 }
 
 
@@ -2032,7 +1930,62 @@ if (historyButton) {
         "click",
         mostrarHistorial
     );
+}
 
+
+// ============================================================
+// BUSCAR PRODUCTO AL ESCRIBIR CÓDIGO
+// ============================================================
+
+if (inputProducto) {
+
+    let temporizadorProducto;
+
+
+    inputProducto.addEventListener(
+        "input",
+        function() {
+
+            clearTimeout(
+                temporizadorProducto
+            );
+
+
+            const codigo =
+                inputProducto.value.trim();
+
+
+            if (!codigo) {
+
+                limpiarDatosProducto();
+
+                configurarCamposProducto(
+                    false
+                );
+
+                if (newProductNotice) {
+                    newProductNotice.style.display =
+                        "none";
+                }
+
+                return;
+            }
+
+
+            temporizadorProducto =
+                setTimeout(
+                    () => {
+
+                        cargarProductoEnFormulario(
+                            codigo
+                        );
+
+                    },
+                    500
+                );
+
+        }
+    );
 }
 
 
@@ -2046,31 +1999,9 @@ document.addEventListener(
 
         ocultarTodo();
 
-
-        if (statusCard) {
-
-            statusCard.classList.remove(
-                "hidden"
-            );
-
-            statusCard.className =
-                "status waiting";
-
-        }
-
-
-        if (statusText) {
-
-            statusText.textContent =
-                "Esperando...";
-
-        }
-
-
         console.log(
             "Almacen SOCO iniciado."
         );
-
 
         console.log(
             "Web NFC disponible:",
