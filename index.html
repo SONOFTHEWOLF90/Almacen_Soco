@@ -2,6 +2,7 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -20,421 +21,438 @@
         rel="stylesheet"
         href="style.css"
     >
+
 </head>
+
 
 <body>
 
-    <main class="app">
+<main class="app">
 
-        <!-- CABECERA -->
 
-        <div class="logo">
-            ALPACA<span>STOCK</span>
+    <!-- ==================================================
+         CABECERA
+    ================================================== -->
+
+    <div class="logo">
+        ALPACA<span>STOCK</span>
+    </div>
+
+    <p class="subtitle">
+        Inventario de lana
+    </p>
+
+
+    <!-- ==================================================
+         LECTOR NFC
+    ================================================== -->
+
+    <section class="card">
+
+        <div class="nfc-icon">
+            📡
         </div>
 
-        <p class="subtitle">
-            Inventario de lana
+        <h1>
+            Escanear cono
+        </h1>
+
+        <p class="description">
+            Acerca el teléfono al NFC del cono.
         </p>
 
 
-        <!-- LECTOR NFC -->
-
-        <section class="card">
-
-            <div class="nfc-icon">
-                📡
-            </div>
-
-            <h1>
-                Escanear cono
-            </h1>
-
-            <p class="description">
-                Acerca el teléfono al NFC del cono.
-            </p>
-
-            <button id="scanButton">
-                LEER NFC
-            </button>
-
-            <div
-                id="status"
-                class="status waiting"
-            >
-
-                <span class="status-dot"></span>
-
-                <span id="statusText">
-                    Esperando...
-                </span>
-
-            </div>
-
-        </section>
+        <button
+            id="scanButton"
+            type="button"
+        >
+            LEER NFC
+        </button>
 
 
-        <!-- ==================================================
-             CONO ENCONTRADO
-        ================================================== -->
-
-        <section
-            id="resultCard"
-            class="card result hidden"
+        <div
+            id="status"
+            class="status waiting"
         >
 
-            <div class="product-header">
+            <span class="status-dot"></span>
 
-                <span class="product-label">
-                    CONO
-                </span>
+            <span id="statusText">
+                Esperando...
+            </span>
 
-                <h2 id="productCode">
-                    ---
-                </h2>
+        </div>
 
-            </div>
+    </section>
 
 
-            <!-- ID DEL CONO -->
+    <!-- ==================================================
+         CONO ENCONTRADO
+    ================================================== -->
 
-            <div class="result-row">
+    <section
+        id="resultCard"
+        class="card result hidden"
+    >
 
-                <span>
-                    ID del cono
-                </span>
+        <div class="product-header">
 
-                <strong id="nfcCode">
-                    ---
-                </strong>
+            <span class="product-label">
+                CONO
+            </span>
 
-            </div>
-
-
-            <!-- PRODUCTO -->
-
-            <div class="result-row">
-
-                <span>
-                    Producto
-                </span>
-
-                <strong id="productDescription">
-                    ---
-                </strong>
-
-            </div>
-
-
-            <div class="result-row">
-
-                <span>
-                    Proveedor
-                </span>
-
-                <strong id="productProvider">
-                    ---
-                </strong>
-
-            </div>
-
-
-            <div class="result-row">
-
-                <span>
-                    Color
-                </span>
-
-                <strong id="productColor">
-                    ---
-                </strong>
-
-            </div>
-
-
-            <!-- PESO DEL CONO -->
-
-            <div class="stock-box">
-
-                <span>
-                    PESO DEL CONO
-                </span>
-
-                <strong id="productWeight">
-                    --- g
-                </strong>
-
-            </div>
-
-
-            <!-- STOCK TOTAL -->
-
-            <div class="stock-box">
-
-                <span>
-                    STOCK TOTAL DEL PRODUCTO
-                </span>
-
-                <strong id="productTotalStock">
-                    --- g
-                </strong>
-
-            </div>
-
-
-            <div class="result-row">
-
-                <span>
-                    Ubicación
-                </span>
-
-                <strong id="productLocation">
-                    ---
-                </strong>
-
-            </div>
-
-
-            <div class="result-row">
-
-                <span>
-                    Estado
-                </span>
-
-                <strong id="productStatus">
-                    ---
-                </strong>
-
-            </div>
-
-
-            <!-- ACCIONES -->
-
-            <div class="action-grid">
-
-                <button
-                    id="entryButton"
-                    type="button"
-                >
-                    ➕ ENTRADA
-                </button>
-
-
-                <button
-                    id="exitButton"
-                    type="button"
-                >
-                    ➖ SALIDA
-                </button>
-
-
-                <button
-                    id="historyButton"
-                    type="button"
-                    class="secondary-button"
-                >
-                    📋 HISTORIAL
-                </button>
-
-            </div>
-
-        </section>
-
-
-        <!-- ==================================================
-             CONO NO REGISTRADO
-        ================================================== -->
-
-        <section
-            id="notFoundCard"
-            class="card hidden"
-        >
-
-            <div class="not-found-icon">
-                🧶
-            </div>
-
-            <h2>
-                Cono no registrado
+            <h2 id="productCode">
+                ---
             </h2>
 
-            <p>
-                Este NFC todavía no está asociado a un cono.
-            </p>
+        </div>
 
 
-            <div class="nfc-code-box">
+        <div class="result-row">
 
-                <span>
-                    ID DEL NFC
-                </span>
+            <span>
+                ID del cono
+            </span>
 
-                <strong id="notFoundCode">
-                    ---
-                </strong>
+            <strong id="nfcCode">
+                ---
+            </strong>
 
-            </div>
+        </div>
+
+
+        <div class="result-row">
+
+            <span>
+                Producto
+            </span>
+
+            <strong id="productDescription">
+                ---
+            </strong>
+
+        </div>
+
+
+        <div class="result-row">
+
+            <span>
+                Proveedor
+            </span>
+
+            <strong id="productProvider">
+                ---
+            </strong>
+
+        </div>
+
+
+        <div class="result-row">
+
+            <span>
+                Color
+            </span>
+
+            <strong id="productColor">
+                ---
+            </strong>
+
+        </div>
+
+
+        <div class="stock-box">
+
+            <span>
+                PESO DEL CONO
+            </span>
+
+            <strong id="productWeight">
+                --- g
+            </strong>
+
+        </div>
+
+
+        <div class="stock-box">
+
+            <span>
+                STOCK TOTAL DEL PRODUCTO
+            </span>
+
+            <strong id="productTotalStock">
+                --- g
+            </strong>
+
+        </div>
+
+
+        <div class="result-row">
+
+            <span>
+                Ubicación
+            </span>
+
+            <strong id="productLocation">
+                ---
+            </strong>
+
+        </div>
+
+
+        <div class="result-row">
+
+            <span>
+                Estado
+            </span>
+
+            <strong id="productStatus">
+                ---
+            </strong>
+
+        </div>
+
+
+        <!-- ACCIONES -->
+
+        <div class="action-grid">
+
+            <button
+                id="entryButton"
+                type="button"
+            >
+                ➕ ENTRADA
+            </button>
 
 
             <button
-                id="registerProductButton"
+                id="exitButton"
                 type="button"
             >
-                REGISTRAR CONO
+                ➖ SALIDA
             </button>
 
-        </section>
+
+            <button
+                id="historyButton"
+                type="button"
+                class="secondary-button"
+            >
+                📋 HISTORIAL
+            </button>
+
+        </div>
+
+    </section>
 
 
-        <!-- ==================================================
-             FORMULARIO CONO
-        ================================================== -->
+    <!-- ==================================================
+         CONO NO REGISTRADO
+    ================================================== -->
 
-        <section
-            id="registerCard"
-            class="card hidden"
+    <section
+        id="notFoundCard"
+        class="card hidden"
+    >
+
+        <div class="not-found-icon">
+            🧶
+        </div>
+
+        <h2>
+            Cono no registrado
+        </h2>
+
+        <p>
+            Este NFC todavía no está asociado a un cono.
+        </p>
+
+
+        <div class="nfc-code-box">
+
+            <span>
+                ID DEL NFC
+            </span>
+
+            <strong id="notFoundCode">
+                ---
+            </strong>
+
+        </div>
+
+
+        <button
+            id="registerProductButton"
+            type="button"
         >
+            REGISTRAR CONO
+        </button>
 
-            <h2>
-                Registrar cono
-            </h2>
-
-            <p class="description">
-                Asocia este NFC a un producto existente.
-            </p>
+    </section>
 
 
-            <!-- ID NFC -->
+    <!-- ==================================================
+         FORMULARIO REGISTRAR CONO
+    ================================================== -->
 
-            <div class="form-group">
+    <section
+        id="registerCard"
+        class="card hidden"
+    >
 
-                <label>
-                    ID del cono
-                </label>
+        <h2>
+            Registrar cono
+        </h2>
 
-                <input
-                    id="inputCodigo"
-                    type="text"
-                    readonly
-                >
-
-            </div>
-
-
-            <!-- CÓDIGO PRODUCTO -->
-
-            <div class="form-group">
-
-                <label for="inputProducto">
-                    Código del producto
-                </label>
-
-                <input
-                    id="inputProducto"
-                    type="text"
-                    placeholder="Ej. RR10001180926"
-                >
-
-            </div>
+        <p class="description">
+            Completa los datos del cono.
+        </p>
 
 
-            <!-- PESO -->
+        <!-- ID -->
 
-            <div class="form-group">
+        <div class="form-group">
 
-                <label for="inputPeso">
-                    Peso actual (g)
-                </label>
+            <label for="inputCodigo">
+                ID del cono
+            </label>
 
-                <input
-                    id="inputPeso"
-                    type="number"
-                    min="0"
-                    step="1"
-                    placeholder="Ej. 305"
-                >
-
-            </div>
-
-
-            <!-- UBICACIÓN -->
-
-            <div class="form-group">
-
-                <label for="inputUbicacion">
-                    Ubicación
-                </label>
-
-                <input
-                    id="inputUbicacion"
-                    type="text"
-                    placeholder="Ej. C-2"
-                >
-
-            </div>
-
-
-            <div class="form-actions">
-
-                <button
-                    id="saveRegisterButton"
-                    type="button"
-                >
-                    GUARDAR CONO
-                </button>
-
-                <button
-                    id="cancelRegisterButton"
-                    type="button"
-                    class="secondary-button"
-                >
-                    CANCELAR
-                </button>
-
-            </div>
-
-
-            <div
-                id="registerStatus"
-                class="status hidden"
+            <input
+                id="inputCodigo"
+                type="text"
+                readonly
+                placeholder="Se generará al guardar"
             >
 
-                <span class="status-dot"></span>
-
-                <span id="registerStatusText">
-                    ---
-                </span>
-
-            </div>
-
-        </section>
+        </div>
 
 
-        <!-- ERROR -->
+        <!-- PRODUCTO -->
 
-        <section
-            id="errorCard"
-            class="card error hidden"
+        <div class="form-group">
+
+            <label for="inputProducto">
+                Código del producto
+            </label>
+
+            <input
+                id="inputProducto"
+                type="text"
+                placeholder="Ej. RR10001180926"
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <!-- PESO -->
+
+        <div class="form-group">
+
+            <label for="inputPeso">
+                Peso actual (g)
+            </label>
+
+            <input
+                id="inputPeso"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Ej. 305"
+            >
+
+        </div>
+
+
+        <!-- UBICACIÓN -->
+
+        <div class="form-group">
+
+            <label for="inputUbicacion">
+                Ubicación
+            </label>
+
+            <input
+                id="inputUbicacion"
+                type="text"
+                placeholder="Ej. C-2"
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <!-- BOTONES -->
+
+        <div class="form-actions">
+
+            <button
+                id="saveRegisterButton"
+                type="button"
+            >
+                GUARDAR CONO
+            </button>
+
+
+            <button
+                id="cancelRegisterButton"
+                type="button"
+                class="secondary-button"
+            >
+                CANCELAR
+            </button>
+
+        </div>
+
+
+        <!-- ESTADO DEL REGISTRO -->
+
+        <div
+            id="registerStatus"
+            class="status hidden"
         >
 
-            <h2>
-                ⚠️ Error
-            </h2>
+            <span class="status-dot"></span>
 
-            <p id="errorText"></p>
+            <span id="registerStatusText">
+                ---
+            </span>
 
-        </section>
+        </div>
 
-
-        <!-- FOOTER -->
-
-        <footer>
-            Alpaca Stock · Inventario NFC
-        </footer>
-
-    </main>
+    </section>
 
 
-    <script src="app.js"></script>
+    <!-- ==================================================
+         ERROR
+    ================================================== -->
+
+    <section
+        id="errorCard"
+        class="card error hidden"
+    >
+
+        <h2>
+            ⚠️ Error
+        </h2>
+
+        <p id="errorText"></p>
+
+    </section>
+
+
+    <!-- ==================================================
+         FOOTER
+    ================================================== -->
+
+    <footer>
+        Alpaca Stock · Inventario NFC
+    </footer>
+
+
+</main>
+
+
+<script src="app.js"></script>
 
 </body>
 
