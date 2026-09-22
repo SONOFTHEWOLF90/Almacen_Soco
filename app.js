@@ -13,23 +13,31 @@ const nfcType = document.getElementById("nfcType");
 const errorText = document.getElementById("errorText");
 
 
+// ======================================================
+// ESTADO
+// ======================================================
+
 function setStatus(type, message) {
 
     statusBox.className = "status " + type;
-
     statusText.textContent = message;
+
 }
 
+
+// ======================================================
+// ERRORES
+// ======================================================
 
 function showError(message) {
 
     errorCard.classList.remove("hidden");
-
     resultCard.classList.add("hidden");
 
     errorText.textContent = message;
 
     setStatus("error", "Error");
+
 }
 
 
@@ -39,6 +47,10 @@ function hideError() {
 
 }
 
+
+// ======================================================
+// RESULTADO
+// ======================================================
 
 function hideResult() {
 
@@ -57,10 +69,12 @@ function showResult(code, content, type) {
     nfcContent.textContent = content;
     nfcType.textContent = type;
 
-    setStatus("success", "NFC leído correctamente");
-
 }
 
+
+// ======================================================
+// LEER TEXTO DEL NFC
+// ======================================================
 
 function decodeRecord(record) {
 
@@ -80,6 +94,10 @@ function decodeRecord(record) {
 
 }
 
+
+// ======================================================
+// LEER MENSAJE NDEF
+// ======================================================
 
 function parseNdefMessage(message) {
 
@@ -112,10 +130,129 @@ function parseNdefMessage(message) {
 }
 
 
+// ======================================================
+// BUSCAR NFC EN GOOGLE SHEETS
+// ======================================================
+
+async function buscarInventario(idNfc) {
+
+    try {
+
+        setStatus(
+            "reading",
+            "Buscando el cono en el inventario..."
+        );
+
+        const url =
+            `/api/google?action=inventory&id_nfc=${encodeURIComponent(idNfc)}`;
+
+        const response = await fetch(url);
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Error HTTP ${response.status}`
+            );
+
+        }
+
+        const data = await response.json();
+
+        console.log("Respuesta inventario:", data);
+
+        return data;
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Error buscando inventario:",
+            error
+        );
+
+        throw error;
+
+    }
+
+}
+
+
+// ======================================================
+// MOSTRAR INVENTARIO
+// ======================================================
+
+function mostrarInventario(data, codigoNfc) {
+
+    if (!data.found || !data.data) {
+
+        showResult(
+            codigoNfc,
+            "Este NFC todavía no está registrado en el inventario.",
+            "NTAG / NO REGISTRADO"
+        );
+
+        setStatus(
+            "success",
+            "NFC leído - cono no registrado"
+        );
+
+        return;
+
+    }
+
+
+    const item = data.data;
+
+    const informacion = [
+
+        `Código: ${item.CODIGO || "-"}`,
+
+        `Descripción: ${item.DESCRIPCION || "-"}`,
+
+        `Proveedor: ${item.PROVEEDOR || "-"}`,
+
+        `Color: ${item.COLOR || "-"}`,
+
+        `Peso inicial: ${item.PESO_INICIAL || "-"} g`,
+
+        `Peso actual: ${item.PESO_ACTUAL || "-"} g`,
+
+        `Ubicación: ${item.UBICACION || "-"}`,
+
+        `Estado: ${item.ESTADO || "-"}`
+
+    ].join("\n");
+
+
+    showResult(
+        codigoNfc,
+        informacion,
+        "NTAG / INVENTARIO"
+    );
+
+
+    setStatus(
+        "success",
+        "Cono encontrado en inventario"
+    );
+
+}
+
+
+// ======================================================
+// ESCANEAR NFC
+// ======================================================
+
 async function scanNFC() {
 
     hideError();
     hideResult();
+
+
+    // ------------------------------------------
+    // COMPROBAR WEB NFC
+    // ------------------------------------------
 
     if (!("NDEFReader" in window)) {
 
@@ -126,12 +263,14 @@ async function scanNFC() {
         );
 
         return;
+
     }
 
 
     try {
 
         scanButton.disabled = true;
+
 
         setStatus(
             "reading",
@@ -144,6 +283,10 @@ async function scanNFC() {
 
         await ndef.scan();
 
+
+        // ------------------------------------------
+        // ERROR DE LECTURA
+        // ------------------------------------------
 
         ndef.addEventListener(
             "readingerror",
@@ -160,36 +303,74 @@ async function scanNFC() {
         );
 
 
+        // ------------------------------------------
+        // NFC DETECTADO
+        // ------------------------------------------
+
         ndef.addEventListener(
             "reading",
-            ({ message, serialNumber }) => {
+            async ({ message, serialNumber }) => {
 
                 console.log(
                     "NFC detectado:",
                     serialNumber
                 );
 
+
+                // ------------------------------------------
+                // OBTENER CONTENIDO NDEF
+                // ------------------------------------------
+
                 const content =
                     parseNdefMessage(message);
 
 
                 /*
-                 * Si el NFC contiene algo como:
+                 * Nuestro NTAG215 actualmente contiene:
                  *
-                 * BL100
+                 * RR1000118092026 Varios Michell
                  *
-                 * utilizamos ese contenido como código.
+                 * Utilizamos ese contenido como ID_NFC.
                  */
 
                 const code =
-                    content || serialNumber || "SIN CÓDIGO";
+                    content ||
+                    serialNumber ||
+                    "SIN CÓDIGO";
 
 
-                showResult(
-                    code,
-                    content || "Sin contenido NDEF",
-                    "NTAG / NDEF"
+                console.log(
+                    "ID NFC:",
+                    code
                 );
+
+
+                // ------------------------------------------
+                // BUSCAR EN GOOGLE SHEETS
+                // ------------------------------------------
+
+                try {
+
+                    const data =
+                        await buscarInventario(code);
+
+
+                    mostrarInventario(
+                        data,
+                        code
+                    );
+
+
+                }
+
+                catch (error) {
+
+                    showError(
+                        "El NFC se leyó correctamente, " +
+                        "pero no se pudo consultar el inventario."
+                    );
+
+                }
 
 
                 scanButton.disabled = false;
@@ -198,7 +379,9 @@ async function scanNFC() {
         );
 
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(error);
 
@@ -208,7 +391,8 @@ async function scanNFC() {
         if (error.name === "NotAllowedError") {
 
             showError(
-                "El navegador no tiene permiso para utilizar NFC."
+                "El navegador no tiene permiso " +
+                "para utilizar NFC."
             );
 
         }
@@ -216,7 +400,8 @@ async function scanNFC() {
         else if (error.name === "NotSupportedError") {
 
             showError(
-                "Este dispositivo o navegador no soporta Web NFC."
+                "Este dispositivo o navegador " +
+                "no soporta Web NFC."
             );
 
         }
@@ -224,7 +409,8 @@ async function scanNFC() {
         else {
 
             showError(
-                "Error NFC: " + error.message
+                "Error NFC: " +
+                error.message
             );
 
         }
@@ -233,6 +419,10 @@ async function scanNFC() {
 
 }
 
+
+// ======================================================
+// BOTÓN
+// ======================================================
 
 scanButton.addEventListener(
     "click",
