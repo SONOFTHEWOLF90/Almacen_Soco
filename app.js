@@ -4,30 +4,47 @@ const statusBox = document.getElementById("status");
 const statusText = document.getElementById("statusText");
 
 const resultCard = document.getElementById("resultCard");
+const notFoundCard = document.getElementById("notFoundCard");
 const errorCard = document.getElementById("errorCard");
 
-const nfcCode = document.getElementById("nfcCode");
-const nfcContent = document.getElementById("nfcContent");
-const nfcType = document.getElementById("nfcType");
+const productCode = document.getElementById("productCode");
+const productDescription =
+    document.getElementById("productDescription");
 
-const errorText = document.getElementById("errorText");
+const productProvider =
+    document.getElementById("productProvider");
+
+const productColor =
+    document.getElementById("productColor");
+
+const productWeight =
+    document.getElementById("productWeight");
+
+const productLocation =
+    document.getElementById("productLocation");
+
+const productStatus =
+    document.getElementById("productStatus");
+
+const nfcCode =
+    document.getElementById("nfcCode");
+
+const notFoundCode =
+    document.getElementById("notFoundCode");
+
+const errorText =
+    document.getElementById("errorText");
 
 
 // ======================================================
-// ELEMENTOS DE REGISTRO
+// FORMULARIO
 // ======================================================
-
-const registerArea =
-    document.getElementById("registerArea");
-
-const registerButton =
-    document.getElementById("registerButton");
 
 const registerCard =
     document.getElementById("registerCard");
 
-const inputNfc =
-    document.getElementById("inputNfc");
+const registerProductButton =
+    document.getElementById("registerProductButton");
 
 const inputCodigo =
     document.getElementById("inputCodigo");
@@ -61,14 +78,14 @@ const registerStatusText =
 
 
 // ======================================================
-// VARIABLE DEL NFC ACTUAL
+// VARIABLES
 // ======================================================
 
-let currentNfcId = "";
+let currentCode = "";
 
 
 // ======================================================
-// ESTADO GENERAL
+// ESTADO
 // ======================================================
 
 function setStatus(type, message) {
@@ -81,7 +98,7 @@ function setStatus(type, message) {
 
 
 // ======================================================
-// ERRORES
+// ERROR
 // ======================================================
 
 function showError(message) {
@@ -89,6 +106,8 @@ function showError(message) {
     errorCard.classList.remove("hidden");
 
     resultCard.classList.add("hidden");
+
+    notFoundCard.classList.add("hidden");
 
     errorText.textContent = message;
 
@@ -105,27 +124,16 @@ function hideError() {
 
 
 // ======================================================
-// RESULTADO
+// OCULTAR PANTALLAS
 // ======================================================
 
-function hideResult() {
+function hideAllResults() {
 
     resultCard.classList.add("hidden");
 
-}
+    notFoundCard.classList.add("hidden");
 
-
-function showResult(code, content, type) {
-
-    hideError();
-
-    resultCard.classList.remove("hidden");
-
-    nfcCode.textContent = code;
-
-    nfcContent.textContent = content;
-
-    nfcType.textContent = type;
+    registerCard.classList.add("hidden");
 
 }
 
@@ -138,9 +146,10 @@ function decodeRecord(record) {
 
     try {
 
-        const decoder = new TextDecoder(
-            record.encoding || "utf-8"
-        );
+        const decoder =
+            new TextDecoder(
+                record.encoding || "utf-8"
+            );
 
         return decoder.decode(record.data);
 
@@ -148,7 +157,7 @@ function decodeRecord(record) {
 
     catch (error) {
 
-        return "[Datos no legibles como texto]";
+        return "";
 
     }
 
@@ -156,7 +165,7 @@ function decodeRecord(record) {
 
 
 // ======================================================
-// LEER MENSAJE NDEF
+// LEER NDEF
 // ======================================================
 
 function parseNdefMessage(message) {
@@ -165,23 +174,7 @@ function parseNdefMessage(message) {
 
     for (const record of message.records) {
 
-        if (record.recordType === "text") {
-
-            content += decodeRecord(record);
-
-        }
-
-        else if (record.recordType === "url") {
-
-            content += decodeRecord(record);
-
-        }
-
-        else {
-
-            content += decodeRecord(record);
-
-        }
+        content += decodeRecord(record);
 
     }
 
@@ -191,13 +184,13 @@ function parseNdefMessage(message) {
 
 
 // ======================================================
-// CONSULTAR INVENTARIO
+// BUSCAR PRODUCTO
 // ======================================================
 
-async function buscarInventario(idNfc) {
+async function buscarProducto(codigo) {
 
     const url =
-        `/api/google?action=inventory&id_nfc=${encodeURIComponent(idNfc)}`;
+        `/api/google?action=inventory&id_nfc=${encodeURIComponent(codigo)}`;
 
     const response =
         await fetch(url);
@@ -216,107 +209,100 @@ async function buscarInventario(idNfc) {
 
 
 // ======================================================
-// MOSTRAR DATOS DEL INVENTARIO
+// MOSTRAR PRODUCTO
 // ======================================================
 
-function mostrarInventario(data, codigoNfc) {
+function mostrarProducto(data, codigo) {
 
     if (!data.found || !data.data) {
 
-        // NFC NO REGISTRADO
-
-        currentNfcId = codigoNfc;
-
-        showResult(
-            codigoNfc,
-            "Este NFC todavía no está registrado en el inventario.",
-            "NTAG / NO REGISTRADO"
-        );
-
-
-        // Mostrar botón de registro
-
-        registerArea.classList.remove("hidden");
+        mostrarProductoNoEncontrado(codigo);
 
         return;
 
     }
 
 
-    // NFC YA REGISTRADO
-
-    registerArea.classList.add("hidden");
-
     const item = data.data;
 
 
-    const informacion = [
+    resultCard.classList.remove("hidden");
 
-        `Código: ${item.CODIGO || "-"}`,
-
-        `Descripción: ${item.DESCRIPCION || "-"}`,
-
-        `Proveedor: ${item.PROVEEDOR || "-"}`,
-
-        `Color: ${item.COLOR || "-"}`,
-
-        `Peso inicial: ${item.PESO_INICIAL || "-"} g`,
-
-        `Peso actual: ${item.PESO_ACTUAL || "-"} g`,
-
-        `Ubicación: ${item.UBICACION || "-"}`,
-
-        `Estado: ${item.ESTADO || "-"}`
-
-    ].join("\n");
+    notFoundCard.classList.add("hidden");
 
 
-    showResult(
-        codigoNfc,
-        informacion,
-        "NTAG / INVENTARIO"
-    );
+    productCode.textContent =
+        item.CODIGO || codigo;
+
+
+    productDescription.textContent =
+        item.DESCRIPCION || "-";
+
+
+    productProvider.textContent =
+        item.PROVEEDOR || "-";
+
+
+    productColor.textContent =
+        item.COLOR || "-";
+
+
+    productWeight.textContent =
+        `${item.PESO_ACTUAL || 0} g`;
+
+
+    productLocation.textContent =
+        item.UBICACION || "-";
+
+
+    productStatus.textContent =
+        item.ESTADO || "-";
+
+
+    nfcCode.textContent =
+        codigo;
 
 
     setStatus(
         "success",
-        "Cono encontrado en inventario"
+        "Producto encontrado"
     );
 
 }
 
 
 // ======================================================
-// ABRIR FORMULARIO
+// PRODUCTO NO ENCONTRADO
 // ======================================================
 
-function abrirFormularioRegistro() {
+function mostrarProductoNoEncontrado(codigo) {
 
-    if (!currentNfcId) {
+    resultCard.classList.add("hidden");
 
-        showError(
-            "Primero debes leer un NFC."
-        );
-
-        return;
-
-    }
+    notFoundCard.classList.remove("hidden");
 
 
-    // Colocar automáticamente el ID
-
-    inputNfc.value =
-        currentNfcId;
+    notFoundCode.textContent =
+        codigo;
 
 
-    // Mostrar formulario
+    setStatus(
+        "success",
+        "Producto no registrado"
+    );
 
-    registerCard.classList.remove("hidden");
+}
 
 
-    // Limpiar campos
+// ======================================================
+// ABRIR REGISTRO
+// ======================================================
 
-    inputCodigo.value = "";
+function abrirRegistro() {
+
+    inputCodigo.value =
+        currentCode;
+
 
     inputDescripcion.value = "";
 
@@ -329,10 +315,15 @@ function abrirFormularioRegistro() {
     inputUbicacion.value = "";
 
 
-    registerStatus.classList.add("hidden");
+    registerStatus.classList.add(
+        "hidden"
+    );
 
 
-    // Llevar la pantalla al formulario
+    registerCard.classList.remove(
+        "hidden"
+    );
+
 
     registerCard.scrollIntoView({
         behavior: "smooth",
@@ -340,11 +331,9 @@ function abrirFormularioRegistro() {
     });
 
 
-    // Enfocar código
-
     setTimeout(() => {
 
-        inputCodigo.focus();
+        inputDescripcion.focus();
 
     }, 400);
 
@@ -352,24 +341,23 @@ function abrirFormularioRegistro() {
 
 
 // ======================================================
-// CERRAR FORMULARIO
+// CANCELAR REGISTRO
 // ======================================================
 
-function cerrarFormularioRegistro() {
+function cancelarRegistro() {
 
-    registerCard.classList.add("hidden");
+    registerCard.classList.add(
+        "hidden"
+    );
 
 }
 
 
 // ======================================================
-// GUARDAR NUEVO CONO
+// GUARDAR PRODUCTO
 // ======================================================
 
-async function guardarCono() {
-
-    const idNfc =
-        inputNfc.value.trim();
+async function guardarProducto() {
 
     const codigo =
         inputCodigo.value.trim();
@@ -383,37 +371,19 @@ async function guardarCono() {
     const color =
         inputColor.value.trim();
 
-    const pesoInicial =
+    const peso =
         inputPeso.value.trim();
 
     const ubicacion =
         inputUbicacion.value.trim();
 
 
-    // ==================================================
-    // VALIDACIONES
-    // ==================================================
-
-    if (!idNfc) {
-
-        mostrarEstadoRegistro(
-            "error",
-            "No se encontró el ID del NFC."
-        );
-
-        return;
-
-    }
-
-
     if (!codigo) {
 
         mostrarEstadoRegistro(
             "error",
-            "Ingresa el código del cono."
+            "No se encontró el código del NFC."
         );
-
-        inputCodigo.focus();
 
         return;
 
@@ -427,42 +397,24 @@ async function guardarCono() {
             "Ingresa la descripción."
         );
 
-        inputDescripcion.focus();
-
         return;
 
     }
 
 
-    if (!proveedor) {
-
-        mostrarEstadoRegistro(
-            "error",
-            "Ingresa el proveedor."
-        );
-
-        inputProveedor.focus();
-
-        return;
-
-    }
-
-
-    if (!pesoInicial) {
+    if (!peso) {
 
         mostrarEstadoRegistro(
             "error",
             "Ingresa el peso inicial."
         );
 
-        inputPeso.focus();
-
         return;
 
     }
 
 
-    if (Number(pesoInicial) < 0) {
+    if (Number(peso) < 0) {
 
         mostrarEstadoRegistro(
             "error",
@@ -474,24 +426,16 @@ async function guardarCono() {
     }
 
 
-    // ==================================================
-    // DESACTIVAR BOTÓN
-    // ==================================================
-
     saveRegisterButton.disabled = true;
 
 
     mostrarEstadoRegistro(
         "reading",
-        "Guardando cono..."
+        "Guardando producto..."
     );
 
 
     try {
-
-        // ==================================================
-        // ENVIAR A VERCEL
-        // ==================================================
 
         const response =
             await fetch(
@@ -500,26 +444,35 @@ async function guardarCono() {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type":
+                            "application/json"
                     },
 
                     body: JSON.stringify({
 
-                        action: "createInventory",
+                        action:
+                            "createInventory",
 
-                        idNfc: idNfc,
+                        ID_NFC:
+                            codigo,
 
-                        codigo: codigo,
+                        CODIGO:
+                            codigo,
 
-                        descripcion: descripcion,
+                        DESCRIPCION:
+                            descripcion,
 
-                        proveedor: proveedor,
+                        PROVEEDOR:
+                            proveedor,
 
-                        color: color,
+                        COLOR:
+                            color,
 
-                        pesoInicial: Number(pesoInicial),
+                        PESO_INICIAL:
+                            Number(peso),
 
-                        ubicacion: ubicacion
+                        UBICACION:
+                            ubicacion
 
                     })
 
@@ -541,79 +494,83 @@ async function guardarCono() {
 
 
         console.log(
-            "Respuesta registro:",
+            "Respuesta:",
             data
         );
 
-
-        // ==================================================
-        // COMPROBAR RESPUESTA
-        // ==================================================
 
         if (!data.success) {
 
             throw new Error(
                 data.error ||
-                "No se pudo registrar el cono."
+                "No se pudo registrar el producto."
             );
 
         }
 
 
-        // ==================================================
-        // REGISTRO CORRECTO
-        // ==================================================
-
         mostrarEstadoRegistro(
             "success",
-            "Cono registrado correctamente."
+            "Producto registrado correctamente."
         );
+
+
+        // Mostrar directamente el producto
+
+        resultCard.classList.remove(
+            "hidden"
+        );
+
+        notFoundCard.classList.add(
+            "hidden"
+        );
+
+
+        productCode.textContent =
+            codigo;
+
+        productDescription.textContent =
+            descripcion;
+
+        productProvider.textContent =
+            proveedor || "-";
+
+        productColor.textContent =
+            color || "-";
+
+        productWeight.textContent =
+            `${Number(peso)} g`;
+
+        productLocation.textContent =
+            ubicacion || "-";
+
+        productStatus.textContent =
+            "ACTIVO";
+
+        nfcCode.textContent =
+            codigo;
 
 
         setStatus(
             "success",
-            "Cono registrado correctamente"
+            "Producto registrado correctamente"
         );
 
-
-        // Ocultar botón registrar
-
-        registerArea.classList.add("hidden");
-
-
-        // Actualizar resultado
-
-        showResult(
-            idNfc,
-            `Código: ${codigo}
-Descripción: ${descripcion}
-Proveedor: ${proveedor}
-Color: ${color}
-Peso inicial: ${pesoInicial} g
-Peso actual: ${pesoInicial} g
-Ubicación: ${ubicacion || "-"}
-Estado: ACTIVO`,
-            "NTAG / INVENTARIO"
-        );
-
-
-        // Ocultar formulario después de un momento
 
         setTimeout(() => {
 
-            registerCard.classList.add("hidden");
+            registerCard.classList.add(
+                "hidden"
+            );
 
-        }, 1800);
+        }, 1500);
 
 
     }
 
     catch (error) {
 
-        console.error(
-            "Error registrando cono:",
-            error
-        );
+        console.error(error);
 
 
         mostrarEstadoRegistro(
@@ -626,7 +583,8 @@ Estado: ACTIVO`,
 
     finally {
 
-        saveRegisterButton.disabled = false;
+        saveRegisterButton.disabled =
+            false;
 
     }
 
@@ -634,7 +592,7 @@ Estado: ACTIVO`,
 
 
 // ======================================================
-// ESTADO DEL FORMULARIO
+// ESTADO DEL REGISTRO
 // ======================================================
 
 function mostrarEstadoRegistro(
@@ -663,23 +621,14 @@ async function scanNFC() {
 
     hideError();
 
-    hideResult();
-
-    registerArea.classList.add(
-        "hidden"
-    );
-
-    registerCard.classList.add(
-        "hidden"
-    );
+    hideAllResults();
 
 
     if (!("NDEFReader" in window)) {
 
         showError(
             "Este navegador no permite Web NFC. " +
-            "Prueba con Google Chrome en Android. " +
-            "También verifica que NFC esté activado."
+            "Utiliza Google Chrome en Android."
         );
 
         return;
@@ -689,12 +638,13 @@ async function scanNFC() {
 
     try {
 
-        scanButton.disabled = true;
+        scanButton.disabled =
+            true;
 
 
         setStatus(
             "reading",
-            "Acerca el teléfono al NTAG215..."
+            "Acerca el teléfono al NFC..."
         );
 
 
@@ -706,7 +656,7 @@ async function scanNFC() {
 
 
         // ==================================================
-        // ERROR DE LECTURA
+        // ERROR NFC
         // ==================================================
 
         ndef.addEventListener(
@@ -715,25 +665,29 @@ async function scanNFC() {
 
                 showError(
                     "No se pudo leer el NFC. " +
-                    "Acerca nuevamente el teléfono al chip."
+                    "Acerca nuevamente el teléfono."
                 );
 
-                scanButton.disabled = false;
+                scanButton.disabled =
+                    false;
 
             }
         );
 
 
         // ==================================================
-        // NFC DETECTADO
+        // NFC LEÍDO
         // ==================================================
 
         ndef.addEventListener(
             "reading",
-            async ({ message, serialNumber }) => {
+            async ({
+                message,
+                serialNumber
+            }) => {
 
                 console.log(
-                    "NFC detectado:",
+                    "Serial NFC:",
                     serialNumber
                 );
 
@@ -742,19 +696,48 @@ async function scanNFC() {
                     parseNdefMessage(message);
 
 
-                const code =
+                /*
+                 * EL CONTENIDO DEL NFC ES EL CÓDIGO
+                 *
+                 * Ejemplo:
+                 *
+                 * 202
+                 *
+                 * 204
+                 *
+                 * 100hc22803
+                 *
+                 * 1-424 CONO
+                 */
+
+
+                const codigo =
                     content ||
                     serialNumber ||
-                    "SIN CÓDIGO";
+                    "";
 
 
-                currentNfcId =
-                    code;
+                if (!codigo) {
+
+                    showError(
+                        "El NFC no contiene un código."
+                    );
+
+                    scanButton.disabled =
+                        false;
+
+                    return;
+
+                }
+
+
+                currentCode =
+                    codigo;
 
 
                 console.log(
-                    "ID NFC:",
-                    code
+                    "Código del producto:",
+                    codigo
                 );
 
 
@@ -762,34 +745,32 @@ async function scanNFC() {
 
                     setStatus(
                         "reading",
-                        "Buscando cono en inventario..."
+                        "Consultando inventario..."
                     );
 
 
                     const data =
-                        await buscarInventario(
-                            code
+                        await buscarProducto(
+                            codigo
                         );
 
 
-                    mostrarInventario(
+                    mostrarProducto(
                         data,
-                        code
+                        codigo
                     );
-
 
                 }
 
                 catch (error) {
 
-                    console.error(
-                        error
-                    );
+                    console.error(error);
 
 
                     showError(
-                        "El NFC se leyó correctamente, " +
-                        "pero no se pudo consultar el inventario."
+                        "El NFC fue leído, " +
+                        "pero no se pudo consultar " +
+                        "el inventario."
                     );
 
                 }
@@ -806,9 +787,7 @@ async function scanNFC() {
 
     catch (error) {
 
-        console.error(
-            error
-        );
+        console.error(error);
 
 
         scanButton.disabled =
@@ -821,8 +800,7 @@ async function scanNFC() {
         ) {
 
             showError(
-                "El navegador no tiene permiso " +
-                "para utilizar NFC."
+                "El navegador no tiene permiso para utilizar NFC."
             );
 
         }
@@ -833,8 +811,7 @@ async function scanNFC() {
         ) {
 
             showError(
-                "Este dispositivo o navegador " +
-                "no soporta Web NFC."
+                "Este dispositivo no soporta Web NFC."
             );
 
         }
@@ -863,19 +840,19 @@ scanButton.addEventListener(
 );
 
 
-registerButton.addEventListener(
+registerProductButton.addEventListener(
     "click",
-    abrirFormularioRegistro
+    abrirRegistro
 );
 
 
 cancelRegisterButton.addEventListener(
     "click",
-    cerrarFormularioRegistro
+    cancelarRegistro
 );
 
 
 saveRegisterButton.addEventListener(
     "click",
-    guardarCono
+    guardarProducto
 );
