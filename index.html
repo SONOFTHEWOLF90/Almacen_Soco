@@ -1,27 +1,52 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="theme-color" content="#111111">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Alpaca Stock - NFC Test</title>
+    <meta
+        name="theme-color"
+        content="#111111"
+    >
 
-    <link rel="stylesheet" href="style.css">
+    <title>Alpaca Stock - Inventario NFC</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
 </head>
+
 
 <body>
 
     <main class="app">
 
+
+        <!-- ==================================================
+             LOGO
+        ================================================== -->
+
         <div class="logo">
             ALPACA<span>STOCK</span>
         </div>
 
+
         <p class="subtitle">
-            Prueba de lectura NFC
+            Inventario NFC
         </p>
+
+
+        <!-- ==================================================
+             LECTOR NFC
+        ================================================== -->
 
         <section class="card">
 
@@ -29,62 +54,326 @@
                 📡
             </div>
 
-            <h1>Lectura NFC</h1>
+            <h1>
+                Lectura NFC
+            </h1>
 
             <p class="description">
                 Pulsa el botón y acerca el teléfono al NTAG215.
             </p>
 
+
             <button id="scanButton">
                 LEER NFC
             </button>
 
-            <div id="status" class="status waiting">
+
+            <div
+                id="status"
+                class="status waiting"
+            >
+
                 <span class="status-dot"></span>
-                <span id="statusText">Esperando...</span>
+
+                <span id="statusText">
+                    Esperando...
+                </span>
+
             </div>
 
         </section>
 
 
-        <section id="resultCard" class="card result hidden">
 
-            <h2>NFC detectado</h2>
+        <!-- ==================================================
+             RESULTADO NFC
+        ================================================== -->
+
+        <section
+            id="resultCard"
+            class="card result hidden"
+        >
+
+            <h2>
+                NFC detectado
+            </h2>
+
 
             <div class="result-row">
-                <span>Código leído</span>
-                <strong id="nfcCode">---</strong>
+
+                <span>
+                    Código leído
+                </span>
+
+                <strong id="nfcCode">
+                    ---
+                </strong>
+
             </div>
 
-            <div class="result-row">
-                <span>Contenido</span>
-                <code id="nfcContent">---</code>
-            </div>
 
             <div class="result-row">
-                <span>Tipo</span>
-                <strong id="nfcType">---</strong>
+
+                <span>
+                    Contenido
+                </span>
+
+                <code id="nfcContent">
+                    ---
+                </code>
+
+            </div>
+
+
+            <div class="result-row">
+
+                <span>
+                    Tipo
+                </span>
+
+                <strong id="nfcType">
+                    ---
+                </strong>
+
+            </div>
+
+
+            <!-- ==============================================
+                 BOTÓN REGISTRAR
+            =============================================== -->
+
+            <div
+                id="registerArea"
+                class="register-area hidden"
+            >
+
+                <button
+                    id="registerButton"
+                    type="button"
+                >
+                    🆕 REGISTRAR CONO
+                </button>
+
             </div>
 
         </section>
 
 
-        <section id="errorCard" class="card error hidden">
 
-            <h2>⚠️ No se pudo leer</h2>
+        <!-- ==================================================
+             FORMULARIO NUEVO CONO
+        ================================================== -->
+
+        <section
+            id="registerCard"
+            class="card hidden"
+        >
+
+            <h2>
+                Registrar nuevo cono
+            </h2>
+
+
+            <p class="description">
+                Completa los datos del cono.
+            </p>
+
+
+            <!-- ID NFC -->
+
+            <div class="form-group">
+
+                <label for="inputNfc">
+                    ID NFC
+                </label>
+
+                <input
+                    id="inputNfc"
+                    type="text"
+                    readonly
+                >
+
+            </div>
+
+
+            <!-- CÓDIGO -->
+
+            <div class="form-group">
+
+                <label for="inputCodigo">
+                    Código
+                </label>
+
+                <input
+                    id="inputCodigo"
+                    type="text"
+                    placeholder="Ej. BL100"
+                >
+
+            </div>
+
+
+            <!-- DESCRIPCIÓN -->
+
+            <div class="form-group">
+
+                <label for="inputDescripcion">
+                    Descripción
+                </label>
+
+                <input
+                    id="inputDescripcion"
+                    type="text"
+                    placeholder="Ej. Varios Michell"
+                >
+
+            </div>
+
+
+            <!-- PROVEEDOR -->
+
+            <div class="form-group">
+
+                <label for="inputProveedor">
+                    Proveedor
+                </label>
+
+                <input
+                    id="inputProveedor"
+                    type="text"
+                    placeholder="Ej. Michell"
+                >
+
+            </div>
+
+
+            <!-- COLOR -->
+
+            <div class="form-group">
+
+                <label for="inputColor">
+                    Color
+                </label>
+
+                <input
+                    id="inputColor"
+                    type="text"
+                    placeholder="Ej. Natural"
+                >
+
+            </div>
+
+
+            <!-- PESO -->
+
+            <div class="form-group">
+
+                <label for="inputPeso">
+                    Peso inicial (g)
+                </label>
+
+                <input
+                    id="inputPeso"
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="Ej. 1000"
+                >
+
+            </div>
+
+
+            <!-- UBICACIÓN -->
+
+            <div class="form-group">
+
+                <label for="inputUbicacion">
+                    Ubicación
+                </label>
+
+                <input
+                    id="inputUbicacion"
+                    type="text"
+                    placeholder="Ej. A-01"
+                >
+
+            </div>
+
+
+            <!-- BOTONES -->
+
+            <div class="form-actions">
+
+                <button
+                    id="saveRegisterButton"
+                    type="button"
+                >
+                    GUARDAR CONO
+                </button>
+
+
+                <button
+                    id="cancelRegisterButton"
+                    type="button"
+                >
+                    CANCELAR
+                </button>
+
+            </div>
+
+
+            <!-- ESTADO DEL REGISTRO -->
+
+            <div
+                id="registerStatus"
+                class="status hidden"
+            >
+
+                <span class="status-dot"></span>
+
+                <span id="registerStatusText">
+                    ---
+                </span>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- ==================================================
+             ERROR
+        ================================================== -->
+
+        <section
+            id="errorCard"
+            class="card error hidden"
+        >
+
+            <h2>
+                ⚠️ No se pudo completar
+            </h2>
 
             <p id="errorText"></p>
 
         </section>
 
 
+
+        <!-- ==================================================
+             FOOTER
+        ================================================== -->
+
         <footer>
-            Alpaca Stock · NFC Test
+            Alpaca Stock · Inventario NFC
         </footer>
 
+
     </main>
+
 
     <script src="app.js"></script>
 
 </body>
+
 </html>
