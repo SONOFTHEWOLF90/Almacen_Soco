@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#111111">
+
+    <title>Alpaca Stock - NFC Test</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <main class="app">
+
+        <div class="logo">
+            ALPACA<span>STOCK</span>
+        </div>
+
+        <p class="subtitle">
+            Prueba de lectura NFC
+        </p>
+
+        <section class="card">
+
+            <div class="nfc-icon">
+                📡
+            </div>
+
+            <h1>Lectura NFC</h1>
+
+            <p class="description">
+                Pulsa el botón y acerca el teléfono al NTAG215.
+            </p>
+
+            <button id="scanButton">
+                LEER NFC
+            </button>
+
+            <div id="status" class="status waiting">
+                <span class="status-dot"></span>
+                <span id="statusText">Esperando...</span>
+            </div>
+
+        </section>
+
+
+        <section id="resultCard" class="card result hidden">
+
+            <h2>NFC detectado</h2>
+
+            <div class="result-row">
+                <span>Código leído</span>
+                <strong id="nfcCode">---</strong>
+            </div>
+
+            <div class="result-row">
+                <span>Contenido</span>
+                <code id="nfcContent">---</code>
+            </div>
+
+            <div class="result-row">
+                <span>Tipo</span>
+                <strong id="nfcType">---</strong>
+            </div>
+
+        </section>
+
+
+        <section id="errorCard" class="card error hidden">
+
+            <h2>⚠️ No se pudo leer</h2>
+
+            <p id="errorText"></p>
+
+        </section>
+
+
+        <footer>
+            Alpaca Stock · NFC Test
+        </footer>
+
+    </main>
+
+    <script src="app.js"></script>
+
+</body>
+</html>
