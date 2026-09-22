@@ -391,10 +391,24 @@ async function obtenerSiguienteConoId() {
 
     try {
 
+        mostrarEstado(
+            "Consultando siguiente ID..."
+        );
+
+        const url =
+            "/api/google?action=nextConoId&t=" +
+            Date.now();
+
         const response =
-            await fetch(
-                "/api/google?action=nextConoId"
-            );
+            await fetch(url, {
+                method: "GET",
+                cache: "no-store"
+            });
+
+        console.log(
+            "Estado nextConoId:",
+            response.status
+        );
 
         if (!response.ok) {
 
@@ -404,13 +418,28 @@ async function obtenerSiguienteConoId() {
             );
         }
 
-        const data =
-            await response.json();
+        const texto =
+            await response.text();
 
         console.log(
-            "Siguiente cono:",
-            data
+            "Respuesta nextConoId:",
+            texto
         );
+
+        let data;
+
+        try {
+
+            data =
+                JSON.parse(texto);
+
+        } catch (error) {
+
+            throw new Error(
+                "El servidor no devolvió JSON válido: " +
+                texto
+            );
+        }
 
         if (
             !data.success ||
@@ -423,12 +452,17 @@ async function obtenerSiguienteConoId() {
             );
         }
 
+        console.log(
+            "ID generado:",
+            data.id_nfc
+        );
+
         return data.id_nfc;
 
     } catch (error) {
 
         console.error(
-            "Error obteniendo ID:",
+            "Error obteniendo ID del cono:",
             error
         );
 
@@ -744,6 +778,10 @@ async function mostrarRegistroCono() {
 
 
         ocultarTodo();
+
+        mostrarEstado(
+            "ID generado: " + nuevoId
+        );
 
 
         // ----------------------------------------------------
