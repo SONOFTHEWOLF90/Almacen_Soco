@@ -22,15 +22,11 @@
     >
 </head>
 
-
 <body>
 
     <main class="app">
 
-
-        <!-- ==================================================
-             CABECERA
-        ================================================== -->
+        <!-- CABECERA -->
 
         <div class="logo">
             ALPACA<span>STOCK</span>
@@ -41,9 +37,7 @@
         </p>
 
 
-        <!-- ==================================================
-             LECTOR NFC
-        ================================================== -->
+        <!-- LECTOR NFC -->
 
         <section class="card">
 
@@ -52,11 +46,11 @@
             </div>
 
             <h1>
-                Escanear producto
+                Escanear cono
             </h1>
 
             <p class="description">
-                Acerca el teléfono al NFC del producto.
+                Acerca el teléfono al NFC del cono.
             </p>
 
             <button id="scanButton">
@@ -80,7 +74,7 @@
 
 
         <!-- ==================================================
-             PRODUCTO
+             CONO ENCONTRADO
         ================================================== -->
 
         <section
@@ -91,7 +85,7 @@
             <div class="product-header">
 
                 <span class="product-label">
-                    PRODUCTO
+                    CONO
                 </span>
 
                 <h2 id="productCode">
@@ -101,10 +95,27 @@
             </div>
 
 
+            <!-- ID DEL CONO -->
+
             <div class="result-row">
 
                 <span>
-                    Descripción
+                    ID del cono
+                </span>
+
+                <strong id="nfcCode">
+                    ---
+                </strong>
+
+            </div>
+
+
+            <!-- PRODUCTO -->
+
+            <div class="result-row">
+
+                <span>
+                    Producto
                 </span>
 
                 <strong id="productDescription">
@@ -140,17 +151,30 @@
             </div>
 
 
-            <!-- ==================================================
-                 STOCK
-            ================================================== -->
+            <!-- PESO DEL CONO -->
 
             <div class="stock-box">
 
                 <span>
-                    STOCK ACTUAL
+                    PESO DEL CONO
                 </span>
 
                 <strong id="productWeight">
+                    --- g
+                </strong>
+
+            </div>
+
+
+            <!-- STOCK TOTAL -->
+
+            <div class="stock-box">
+
+                <span>
+                    STOCK TOTAL DEL PRODUCTO
+                </span>
+
+                <strong id="productTotalStock">
                     --- g
                 </strong>
 
@@ -183,34 +207,7 @@
             </div>
 
 
-            <!-- ==================================================
-                 NFC
-            ================================================== -->
-
-            <details class="technical-info">
-
-                <summary>
-                    Información NFC
-                </summary>
-
-                <div class="result-row">
-
-                    <span>
-                        ID leído
-                    </span>
-
-                    <code id="nfcCode">
-                        ---
-                    </code>
-
-                </div>
-
-            </details>
-
-
-            <!-- ==================================================
-                 ACCIONES
-            ================================================== -->
+            <!-- ACCIONES -->
 
             <div class="action-grid">
 
@@ -244,7 +241,7 @@
 
 
         <!-- ==================================================
-             PRODUCTO NO REGISTRADO
+             CONO NO REGISTRADO
         ================================================== -->
 
         <section
@@ -253,22 +250,22 @@
         >
 
             <div class="not-found-icon">
-                🆕
+                🧶
             </div>
 
             <h2>
-                Producto no registrado
+                Cono no registrado
             </h2>
 
             <p>
-                El código leído del NFC todavía no existe
-                en el inventario.
+                Este NFC todavía no está asociado a un cono.
             </p>
+
 
             <div class="nfc-code-box">
 
                 <span>
-                    CÓDIGO LEÍDO
+                    ID DEL NFC
                 </span>
 
                 <strong id="notFoundCode">
@@ -277,18 +274,19 @@
 
             </div>
 
+
             <button
                 id="registerProductButton"
                 type="button"
             >
-                REGISTRAR PRODUCTO
+                REGISTRAR CONO
             </button>
 
         </section>
 
 
         <!-- ==================================================
-             FORMULARIO PRODUCTO
+             FORMULARIO CONO
         ================================================== -->
 
         <section
@@ -297,19 +295,20 @@
         >
 
             <h2>
-                Registrar producto
+                Registrar cono
             </h2>
 
             <p class="description">
-                El código del NFC se utilizará como código
-                del producto.
+                Asocia este NFC a un producto existente.
             </p>
 
+
+            <!-- ID NFC -->
 
             <div class="form-group">
 
                 <label>
-                    Código
+                    ID del cono
                 </label>
 
                 <input
@@ -321,55 +320,29 @@
             </div>
 
 
+            <!-- CÓDIGO PRODUCTO -->
+
             <div class="form-group">
 
-                <label for="inputDescripcion">
-                    Descripción
+                <label for="inputProducto">
+                    Código del producto
                 </label>
 
                 <input
-                    id="inputDescripcion"
+                    id="inputProducto"
                     type="text"
-                    placeholder="Descripción del producto"
+                    placeholder="Ej. RR10001180926"
                 >
 
             </div>
 
 
-            <div class="form-group">
-
-                <label for="inputProveedor">
-                    Proveedor
-                </label>
-
-                <input
-                    id="inputProveedor"
-                    type="text"
-                    placeholder="Ej. Michell"
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="inputColor">
-                    Color
-                </label>
-
-                <input
-                    id="inputColor"
-                    type="text"
-                    placeholder="Color"
-                >
-
-            </div>
-
+            <!-- PESO -->
 
             <div class="form-group">
 
                 <label for="inputPeso">
-                    Peso inicial (g)
+                    Peso actual (g)
                 </label>
 
                 <input
@@ -377,11 +350,13 @@
                     type="number"
                     min="0"
                     step="1"
-                    placeholder="Ej. 1000"
+                    placeholder="Ej. 305"
                 >
 
             </div>
 
+
+            <!-- UBICACIÓN -->
 
             <div class="form-group">
 
@@ -392,7 +367,7 @@
                 <input
                     id="inputUbicacion"
                     type="text"
-                    placeholder="Ej. A-01"
+                    placeholder="Ej. C-2"
                 >
 
             </div>
@@ -404,7 +379,7 @@
                     id="saveRegisterButton"
                     type="button"
                 >
-                    GUARDAR PRODUCTO
+                    GUARDAR CONO
                 </button>
 
                 <button
@@ -434,9 +409,7 @@
         </section>
 
 
-        <!-- ==================================================
-             ERROR
-        ================================================== -->
+        <!-- ERROR -->
 
         <section
             id="errorCard"
@@ -452,9 +425,7 @@
         </section>
 
 
-        <!-- ==================================================
-             FOOTER
-        ================================================== -->
+        <!-- FOOTER -->
 
         <footer>
             Alpaca Stock · Inventario NFC
